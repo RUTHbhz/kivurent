@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Calendar, MapPin, Shield, Star, Info, ChevronLeft, ChevronRight, Truck, ShoppingBag } from 'lucide-react';
 
 const ListingDetails = () => {
     const { id } = useParams();
     const [selectedImg, setSelectedImg] = useState(0);
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
 
     // Mock data
     const listing = {
@@ -18,6 +21,16 @@ const ListingDetails = () => {
         description: "Cet appareil photo hybride plein format est idéal pour vos événements, mariages ou tournages professionnels à Goma. Livré avec un objectif 28-70mm f/3.5-5.6 OSS, une batterie et un chargeur.",
         images: ["🏠", "📷", "📽", "📸"],
         availability: "Disponible",
+    };
+
+    const handleBooking = () => {
+        if (!currentUser) {
+            alert("Vous devez être connecté pour effectuer une réservation.");
+            navigate('/login', { state: { from: `/listing/${id}` } });
+            return;
+        }
+        // Proceed with booking logic (mock for now)
+        alert(`Réservation initiée pour ${listing.title} !`);
     };
 
     return (
@@ -111,7 +124,10 @@ const ListingDetails = () => {
                             </div>
                         </div>
 
-                        <button className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-2 group">
+                        <button
+                            onClick={handleBooking}
+                            className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-2 group"
+                        >
                             <ShoppingBag size={20} className="group-hover:scale-110 transition-transform" />
                             Réserver maintenant
                         </button>
@@ -122,8 +138,6 @@ const ListingDetails = () => {
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 };

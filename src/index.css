@@ -226,19 +226,7 @@ textarea::placeholder {
   animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Utility Classes used in inline styles replacement */
-.text-primary {
-  color: var(--primary);
-}
-
-.text-text-muted {
-  color: var(--text-muted);
-}
-
-.bg-primary {
-  background-color: var(--primary);
-}
-
+/* Utility Classes for Theme Compatibility */
 .bg-white\/5 {
   background-color: var(--bg-input);
 }

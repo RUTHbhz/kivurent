@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import OffererDashboard from './pages/OffererDashboard';
@@ -90,11 +91,27 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/offerer/dashboard" element={<OffererDashboard />} />
-              <Route path="/offerer/create-listing" element={<CreateListing />} />
+              <Route path="/offerer/dashboard" element={
+                <ProtectedRoute allowedRoles={['offerer', 'admin']}>
+                  <OffererDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/offerer/create-listing" element={
+                <ProtectedRoute allowedRoles={['offerer', 'admin']}>
+                  <CreateListing />
+                </ProtectedRoute>
+              } />
               <Route path="/listing/:id" element={<ListingDetails />} />
-              <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/delivery/dashboard" element={
+                <ProtectedRoute allowedRoles={['delivery', 'admin']}>
+                  <DeliveryDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/dashboard" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
             </Routes>
           </Layout>
         </Router>

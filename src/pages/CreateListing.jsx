@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
 import { Camera, Plus, Trash2, MapPin, Tag, DollarSign, Loader2 } from 'lucide-react';
+import { storage } from '../services/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const CreateListing = () => {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const handleImageChange = (e) => {
-        // Mock image selection
+    const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
-            const newImg = URL.createObjectURL(e.target.files[0]);
-            setImages([...images, newImg]);
+            const file = e.target.files[0];
+            const storageRef = ref(storage, `listings/${Date.now()}_${file.name}`);
+            setLoading(true);
+            try {
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                setImages([...images, downloadURL]);
+            } catch (error) {
+                console.error("Error uploading image:", error);
+                alert("Erreur lors du téléchargement de l'image");
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
