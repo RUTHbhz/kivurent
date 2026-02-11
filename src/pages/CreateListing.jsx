@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
 import { Camera, Plus, Trash2, MapPin, Tag, DollarSign, Loader2 } from 'lucide-react';
-import { storage } from '../services/firebase';
+import { useNavigate } from 'react-router-dom';
+import { db, storage } from '../services/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const CreateListing = () => {
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [category, setCategory] = useState('electronics');
+    const [location, setLocation] = useState('');
+    const [price, setPrice] = useState('');
 
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -16,12 +27,50 @@ const CreateListing = () => {
                 const snapshot = await uploadBytes(storageRef, file);
                 const downloadURL = await getDownloadURL(snapshot.ref);
                 setImages([...images, downloadURL]);
+                toast.success("Image téléchargée");
             } catch (error) {
                 console.error("Error uploading image:", error);
-                alert("Erreur lors du téléchargement de l'image");
+                toast.error("Erreur lors du téléchargement de l'image");
             } finally {
                 setLoading(false);
             }
+        }
+    };
+
+    const handlePublish = async () => {
+        if (!title || !description || !price || !location) {
+            toast.error("Veuillez remplir tous les champs");
+            return;
+        }
+
+        if (images.length === 0) {
+            toast.error("Veuillez ajouter au moins une image");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await addDoc(collection(db, "listings"), {
+                title,
+                description,
+                category,
+                location,
+                price: parseFloat(price),
+                imageUrl: images[0],
+                images: images,
+                ownerId: currentUser.uid,
+                ownerName: currentUser.displayName || "Propriétaire",
+                status: "pending", // For admin validation
+                createdAt: new Date(),
+                availability: "Disponible"
+            });
+            toast.success("Annonce envoyée pour validation !");
+            navigate('/offerer/dashboard');
+        } catch (error) {
+            console.error("Error publishing listing:", error);
+            toast.error("Erreur lors de la publication");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -36,16 +85,31 @@ const CreateListing = () => {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm text-text-muted mb-1">Titre de l'annonce</label>
-                                <input type="text" className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none" placeholder="Ex: Appareil de sonorisation complet" />
+                                <input
+                                    type="text"
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none"
+                                    placeholder="Ex: Appareil de sonorisation complet"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm text-text-muted mb-1">Description</label>
-                                <textarea className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none h-32" placeholder="Décrivez votre bien en détail..."></textarea>
+                                <textarea
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none h-32"
+                                    placeholder="Décrivez votre bien en détail..."
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                ></textarea>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm text-text-muted mb-1 flex items-center gap-1"><Tag size={14} /> Catégorie</label>
-                                    <select className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none text-white">
+                                    <select
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none text-white"
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value)}
+                                    >
                                         <option value="electronics">Électronique</option>
                                         <option value="tools">Outillage</option>
                                         <option value="events">Événementiel</option>
@@ -54,7 +118,13 @@ const CreateListing = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm text-text-muted mb-1 flex items-center gap-1"><MapPin size={14} /> Localisation</label>
-                                    <input type="text" className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none" placeholder="Ex: Goma, Himbi" />
+                                    <input
+                                        type="text"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none"
+                                        placeholder="Ex: Goma, Himbi"
+                                        value={location}
+                                        onChange={(e) => setLocation(e.target.value)}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -65,7 +135,13 @@ const CreateListing = () => {
                         <div className="flex items-center gap-4">
                             <div className="flex-1">
                                 <label className="block text-sm text-text-muted mb-1 flex items-center gap-1"><DollarSign size={14} /> Prix par jour ($)</label>
-                                <input type="number" className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none" placeholder="0.00" />
+                                <input
+                                    type="number"
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none"
+                                    placeholder="0.00"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                />
                             </div>
                             <div className="flex-1 pt-6 text-sm italic text-text-muted">
                                 KivuRent prendra une commission de 10% sur chaque transaction.
@@ -100,15 +176,17 @@ const CreateListing = () => {
                         <p className="text-xs text-text-muted">Maximum 4 images. La première sera la photo principale.</p>
                     </div>
 
-                    <button className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-2">
+                    <button
+                        onClick={handlePublish}
+                        disabled={loading}
+                        className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-2"
+                    >
                         {loading ? <Loader2 className="animate-spin" /> : <Camera size={20} />}
                         Publier l'annonce
                     </button>
                     <p className="text-center text-xs text-text-muted">Votre annonce sera validée par un admin sous 24h.</p>
                 </div>
             </div>
-
-
         </div>
     );
 };

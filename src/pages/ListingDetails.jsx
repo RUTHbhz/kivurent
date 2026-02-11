@@ -1,37 +1,70 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../services/firebase';
+import { doc, getDoc, collection, addDoc } from 'firebase/firestore';
+import toast from 'react-hot-toast';
 import { Calendar, MapPin, Shield, Star, Info, ChevronLeft, ChevronRight, Truck, ShoppingBag } from 'lucide-react';
 
 const ListingDetails = () => {
     const { id } = useParams();
     const [selectedImg, setSelectedImg] = useState(0);
+    const [listing, setListing] = useState(null);
+    const [loading, setLoading] = useState(true);
     const { currentUser } = useAuth();
     const navigate = useNavigate();
 
-    // Mock data
-    const listing = {
-        title: "Appareil photo professionnel Sony Alpha a7 III",
-        category: "Électronique",
-        price: 35,
-        owner: "Gaston Mubiru",
-        rating: 4.8,
-        reviews: 12,
-        location: "Goma, Quartier Himbi",
-        description: "Cet appareil photo hybride plein format est idéal pour vos événements, mariages ou tournages professionnels à Goma. Livré avec un objectif 28-70mm f/3.5-5.6 OSS, une batterie et un chargeur.",
-        images: ["🏠", "📷", "📽", "📸"],
-        availability: "Disponible",
-    };
+    useState(() => {
+        const fetchListing = async () => {
+            try {
+                const docRef = doc(db, "listings", id);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setListing(docSnap.data());
+                } else {
+                    toast.error("Annonce introuvable");
+                    navigate('/');
+                }
+            } catch (error) {
+                console.error("Error fetching listing:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchListing();
+    }, [id]);
 
-    const handleBooking = () => {
+    const handleBooking = async () => {
         if (!currentUser) {
-            alert("Vous devez être connecté pour effectuer une réservation.");
+            toast.error("Vous devez être connecté pour effectuer une réservation.");
             navigate('/login', { state: { from: `/listing/${id}` } });
             return;
         }
-        // Proceed with booking logic (mock for now)
-        alert(`Réservation initiée pour ${listing.title} !`);
+
+        try {
+            // Create a mission/order for the delivery team
+            await addDoc(collection(db, "orders"), {
+                listingId: id,
+                itemName: listing.title,
+                price: listing.price,
+                clientId: currentUser.uid,
+                clientName: currentUser.displayName || "Client",
+                ownerId: listing.ownerId,
+                ownerName: listing.ownerName,
+                pickupLocation: listing.location,
+                deliveryLocation: "A définir avec le client", // Placeholder
+                deliveryStatus: "waiting",
+                createdAt: new Date()
+            });
+            toast.success(`Réservation initiée pour ${listing.title} !`);
+            navigate('/');
+        } catch (error) {
+            toast.error("Erreur lors de la réservation");
+        }
     };
+
+    if (loading) return <div className="py-20 text-center glass animate-pulse mx-4">Chargement des détails...</div>;
+    if (!listing) return null;
 
     return (
         <div className="py-10 animate-fade-in mb-20">
@@ -42,18 +75,22 @@ const ListingDetails = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 {/* Gallery */}
                 <div className="space-y-4">
-                    <div className="glass aspect-[4/3] flex items-center justify-center text-9xl relative overflow-hidden">
+                    <div className="glass aspect-[4/3] flex items-center justify-center relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                        {listing.images[selectedImg]}
+                        {(listing.images && listing.images.length > 0) ? (
+                            <img src={listing.images[selectedImg]} alt={listing.title} className="w-full h-full object-cover" />
+                        ) : (
+                            <span className="text-9xl">📦</span>
+                        )}
                     </div>
                     <div className="grid grid-cols-4 gap-4">
-                        {listing.images.map((img, idx) => (
+                        {listing.images?.map((img, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setSelectedImg(idx)}
-                                className={`glass aspect-square flex items-center justify-center text-2xl transition-all ${selectedImg === idx ? 'border-primary ring-2 ring-primary/20' : 'hover:bg-white/5'}`}
+                                className={`glass aspect-square flex items-center justify-center overflow-hidden transition-all ${selectedImg === idx ? 'border-primary ring-2 ring-primary/20' : 'hover:bg-white/5'}`}
                             >
-                                {img}
+                                <img src={img} alt="" className="w-full h-full object-cover" />
                             </button>
                         ))}
                     </div>
