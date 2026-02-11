@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../services/firebase';
+import { auth, db } from '../services/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { LogIn, UserPlus } from 'lucide-react';
 
@@ -15,9 +16,25 @@ const LoginPage = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            toast.success("Connexion réussie !");
-            navigate('/');
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Fetch user role immediately for redirection
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                toast.success(`Bienvenue ${userData.displayName || '!'}`);
+
+                if (userData.role === 'admin') {
+                    navigate('/admin/dashboard');
+                } else if (userData.role === 'delivery') {
+                    navigate('/delivery/dashboard');
+                } else {
+                    navigate('/');
+                }
+            } else {
+                navigate('/');
+            }
         } catch (error) {
             console.error("Login error:", error);
             toast.error("Erreur de connexion: " + error.message);
