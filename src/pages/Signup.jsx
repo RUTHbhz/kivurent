@@ -107,7 +107,7 @@ const SignupPage = () => {
                     <div>
                         <label className="block text-sm font-medium mb-3">Quel est votre rôle ?</label>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {['client', 'offerer', 'delivery', 'admin'].map((r) => (
+                            {['client', 'offerer'].map((r) => (
                                 <button
                                     key={r}
                                     type="button"
@@ -117,7 +117,7 @@ const SignupPage = () => {
                                         : 'bg-white/5 border-white/10 text-text-muted hover:border-white/20'
                                         }`}
                                 >
-                                    {r === 'offerer' ? 'Loueur' : r === 'delivery' ? 'Livreur' : r === 'admin' ? 'Admin' : r}
+                                    {r === 'offerer' ? 'Loueur' : r}
                                 </button>
                             ))}
                         </div>
