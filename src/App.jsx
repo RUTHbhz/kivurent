@@ -6,6 +6,8 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Login from './pages/Login';
+import Home from './pages/Home';
+import HowItWorks from './pages/HowItWorks';
 import AdminLogin from './pages/AdminLogin';
 import DeliveryLogin from './pages/DeliveryLogin';
 import Signup from './pages/Signup';
