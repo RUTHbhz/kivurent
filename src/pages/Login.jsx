@@ -1,19 +1,43 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { auth } from '../services/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { LogIn, UserPlus } from 'lucide-react';
 
 const LoginPage = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            navigate('/');
+        } catch (error) {
+            console.error("Login error:", error);
+            alert("Erreur de connexion: " + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="max-w-md mx-auto mt-12 animate-fade-in">
             <div className="glass p-8">
                 <h2 className="text-3xl font-bold mb-6 gradient-text text-center">Connexion</h2>
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleLogin}>
                     <div>
                         <label className="block text-sm font-medium mb-1">Email</label>
                         <input
                             type="email"
                             className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none transition-colors"
                             placeholder="votre@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
                         />
                     </div>
                     <div>
@@ -22,10 +46,13 @@ const LoginPage = () => {
                             type="password"
                             className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none transition-colors"
                             placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                     </div>
-                    <button type="submit" className="w-full btn-primary py-3 mt-4">
-                        Se connecter
+                    <button type="submit" disabled={loading} className="w-full btn-primary py-3 mt-4">
+                        {loading ? 'Connexion...' : 'Se connecter'}
                     </button>
                 </form>
                 <div className="mt-6 text-center text-sm text-text-muted">

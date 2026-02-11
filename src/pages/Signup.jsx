@@ -1,9 +1,44 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock, Phone, User } from 'lucide-react';
+import { auth, db } from '../services/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+
 
 const SignupPage = () => {
     const [role, setRole] = useState('client');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            await setDoc(doc(db, "users", user.uid), {
+                email: user.email,
+                displayName: name,
+                phoneNumber: phone,
+                role: role,
+                createdAt: new Date()
+            });
+
+            alert("Compte créé avec succès !");
+            navigate('/');
+        } catch (error) {
+            console.error("Error signing up:", error);
+            alert("Erreur lors de l'inscription: " + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="max-w-xl mx-auto mt-12 animate-fade-in mb-20">
@@ -11,7 +46,7 @@ const SignupPage = () => {
                 <h2 className="text-3xl font-bold mb-2 gradient-text text-center">Créer un compte</h2>
                 <p className="text-center text-text-muted mb-8 italic">Rejoignez la communauté KivuRent</p>
 
-                <form className="space-y-6">
+                <form className="space-y-6" onSubmit={handleSignup}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-1 flex items-center gap-2">
@@ -21,6 +56,9 @@ const SignupPage = () => {
                                 type="text"
                                 className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none transition-colors"
                                 placeholder="Jean D'Amour"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
                             />
                         </div>
                         <div>
@@ -31,6 +69,8 @@ const SignupPage = () => {
                                 type="tel"
                                 className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none transition-colors"
                                 placeholder="+243 ..."
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
                             />
                         </div>
                     </div>
@@ -43,6 +83,9 @@ const SignupPage = () => {
                             type="email"
                             className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none transition-colors"
                             placeholder="votre@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -54,30 +97,33 @@ const SignupPage = () => {
                             type="password"
                             className="w-full bg-white/5 border border-white/10 rounded-lg p-3 focus:border-primary outline-none transition-colors"
                             placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium mb-3">Quel est votre rôle ?</label>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {['client', 'offerer', 'delivery'].map((r) => (
+                            {['client', 'offerer', 'delivery', 'admin'].map((r) => (
                                 <button
                                     key={r}
                                     type="button"
                                     onClick={() => setRole(r)}
                                     className={`p-3 rounded-xl border transition-all text-sm capitalize ${role === r
-                                            ? 'bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]'
-                                            : 'bg-white/5 border-white/10 text-text-muted hover:border-white/20'
+                                        ? 'bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(99,102,241,0.2)]'
+                                        : 'bg-white/5 border-white/10 text-text-muted hover:border-white/20'
                                         }`}
                                 >
-                                    {r === 'offerer' ? 'Loueur' : r === 'delivery' ? 'Livreur' : r}
+                                    {r === 'offerer' ? 'Loueur' : r === 'delivery' ? 'Livreur' : r === 'admin' ? 'Admin' : r}
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full btn-primary py-4 mt-6 text-lg font-bold">
-                        S'inscrire maintenant
+                    <button type="submit" disabled={loading} className="w-full btn-primary py-4 mt-6 text-lg font-bold">
+                        {loading ? 'Inscription...' : "S'inscrire maintenant"}
                     </button>
                 </form>
 
