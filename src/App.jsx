@@ -1,10 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Login from './pages/Login';
+import AdminLogin from './pages/AdminLogin';
+import DeliveryLogin from './pages/DeliveryLogin';
 import Signup from './pages/Signup';
 import OffererDashboard from './pages/OffererDashboard';
 import CreateListing from './pages/CreateListing';
@@ -86,10 +89,18 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          <Toaster position="top-right" toastOptions={{
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+          }} />
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/delivery/login" element={<DeliveryLogin />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/offerer/dashboard" element={
                 <ProtectedRoute allowedRoles={['offerer', 'admin']}>

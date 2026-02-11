@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import toast from 'react-hot-toast';
 import { LogIn, UserPlus } from 'lucide-react';
 
 const LoginPage = () => {
@@ -15,10 +16,11 @@ const LoginPage = () => {
         setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            toast.success("Connexion réussie !");
             navigate('/');
         } catch (error) {
             console.error("Login error:", error);
-            alert("Erreur de connexion: " + error.message);
+            toast.error("Erreur de connexion: " + error.message);
         } finally {
             setLoading(false);
         }

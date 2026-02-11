@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock, Phone, User } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { auth, db } from '../services/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -30,11 +31,11 @@ const SignupPage = () => {
                 createdAt: new Date()
             });
 
-            alert("Compte créé avec succès !");
+            toast.success("Compte créé avec succès !");
             navigate('/');
         } catch (error) {
             console.error("Error signing up:", error);
-            alert("Erreur lors de l'inscription: " + error.message);
+            toast.error("Erreur lors de l'inscription: " + error.message);
         } finally {
             setLoading(false);
         }
