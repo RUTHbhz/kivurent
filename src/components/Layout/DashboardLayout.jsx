@@ -31,9 +31,15 @@ const DashboardLayout = ({ children, role }) => {
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <Link to="/" className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-                        <Home size={16} /> <span className="hidden sm:inline">Retour au site</span>
+                    <Link to="/admin/dashboard" className="p-3 hover:bg-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-primary transition-all shadow-lg hover:shadow-primary/10" title="Dashboard">
+                        <LayoutDashboard size={24} />
                     </Link>
+                    <Link to="/admin/users" className="p-3 hover:bg-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-primary transition-all shadow-lg hover:shadow-primary/10" title="Utilisateurs">
+                        <Users size={24} />
+                    </Link>
+                    <button className="p-3 hover:bg-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-red-400 transition-all">
+                        <Settings size={22} />
+                    </button>
                     <button onClick={handleLogout} className="text-sm font-bold text-red-400 hover:text-red-300 transition-colors flex items-center gap-2">
                         <LogOut size={16} /> <span className="hidden sm:inline">Quitter</span>
                     </button>

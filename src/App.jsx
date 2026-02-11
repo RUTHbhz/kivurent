@@ -16,6 +16,7 @@ import CreateListing from './pages/CreateListing';
 import ListingDetails from './pages/ListingDetails';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
 import DashboardLayout from './components/Layout/DashboardLayout';
 import './index.css';
 
@@ -38,6 +39,7 @@ function App() {
                 <DashboardLayout role="admin">
                   <Routes>
                     <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="users" element={<AdminUsers />} />
                   </Routes>
                 </DashboardLayout>
               </ProtectedRoute>

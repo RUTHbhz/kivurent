@@ -20,7 +20,14 @@ export const AuthProvider = ({ children }) => {
                 try {
                     const userDoc = await getDoc(doc(db, 'users', user.uid));
                     if (userDoc.exists()) {
-                        setUserData(userDoc.data());
+                        const data = userDoc.data();
+                        if (data.status === 'suspended') {
+                            await auth.signOut();
+                            toast.error("Votre compte a été suspendu par un administrateur.");
+                            setUserData(null);
+                        } else {
+                            setUserData(data);
+                        }
                     }
                 } catch (error) {
                     console.error("Error fetching user data:", error);
