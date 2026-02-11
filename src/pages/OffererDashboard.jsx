@@ -29,7 +29,7 @@ const OffererDashboard = () => {
                 setListings(userListings);
 
                 // Calculate stats
-                const activeCount = userListings.filter(l => l.status === 'approved').length;
+                const activeCount = userListings.filter(l => l.status === 'active').length;
                 const pendingCount = userListings.filter(l => l.status === 'pending').length;
                 // Mock revenue calculation for now
                 const estimatedRevenue = userListings.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0);
@@ -112,11 +112,11 @@ const OffererDashboard = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <span className={`text-xs px-2 py-1 rounded-full ${item.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                                        <span className={`text-xs px-2 py-1 rounded-full ${item.status === 'active' ? 'bg-green-500/20 text-green-400' :
                                             item.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
                                                 'bg-amber-500/20 text-amber-400'
                                             }`}>
-                                            {item.status === 'approved' ? 'Actif' : item.status === 'rejected' ? 'Rejeté' : 'En attente'}
+                                            {item.status === 'active' ? 'Actif' : item.status === 'rejected' ? 'Rejeté' : 'En attente'}
                                         </span>
                                         <button onClick={() => handleDelete(item.id)} className="text-text-muted hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <XCircle size={18} />

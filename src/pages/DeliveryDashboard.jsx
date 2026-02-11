@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, updateDoc, doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { Package, Truck, Clock, CheckCircle, MapPin, DollarSign, User } from 'lucide-react';
+import { Package, Truck, Clock, CheckCircle, MapPin, DollarSign, User, Rocket, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const DeliveryDashboard = () => {

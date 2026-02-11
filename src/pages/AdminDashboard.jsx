@@ -70,7 +70,7 @@ const AdminDashboard = () => {
 
             // Remove from local state
             setPendingListings(prev => prev.filter(l => l.id !== listingId));
-            alert(`Annonce ${action === 'approved' ? 'approuvée' : 'rejetée'} avec succès !`);
+            alert(`Annonce ${action === 'active' ? 'activée' : 'rejetée'} avec succès !`);
         } catch (error) {
             console.error("Error updating listing:", error);
             alert("Erreur lors de la mise à jour.");
@@ -132,7 +132,7 @@ const AdminDashboard = () => {
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <button
-                                                onClick={() => handleAction(listing.id, 'approved')}
+                                                onClick={() => handleAction(listing.id, 'active')}
                                                 className="p-2 text-green-400 hover:bg-green-400/10 rounded-lg transition-colors"
                                                 title="Approuver"
                                             >

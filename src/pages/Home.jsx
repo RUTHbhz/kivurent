@@ -11,21 +11,28 @@ const Home = () => {
     useEffect(() => {
         const fetchListings = async () => {
             try {
+                // Temporary workaround: remove orderBy to avoid index requirement
                 const q = query(
                     collection(db, "listings"),
                     where("status", "==", "active"),
-                    orderBy("createdAt", "desc"),
-                    limit(6)
+                    limit(20) // Fetch a bit more to sort in memory
                 );
                 const querySnapshot = await getDocs(q);
-                const results = [];
+                let results = [];
                 querySnapshot.forEach((doc) => {
                     results.push({ id: doc.id, ...doc.data() });
                 });
-                setListings(results);
+
+                // Sort in JS: latest first
+                results.sort((a, b) => {
+                    const dateA = a.createdAt?.seconds || 0;
+                    const dateB = b.createdAt?.seconds || 0;
+                    return dateB - dateA;
+                });
+
+                setListings(results.slice(0, 6));
             } catch (error) {
                 console.error("Error fetching listings:", error);
-                // toast.error("Erreur lors du chargement des annonces");
             } finally {
                 setLoading(false);
             }
