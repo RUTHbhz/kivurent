@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Home, Shield, Truck } from 'lucide-react';
+import { LogOut, Home, Shield, Truck, LayoutDashboard, Users, Settings } from 'lucide-react';
 import { auth } from '../../services/firebase';
 import toast from 'react-hot-toast';
 
@@ -31,12 +31,14 @@ const DashboardLayout = ({ children, role }) => {
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <Link to="/admin/dashboard" className="p-3 hover:bg-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-primary transition-all shadow-lg hover:shadow-primary/10" title="Dashboard">
+                    <Link to={`/${role}/dashboard`} className="p-3 hover:bg-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-primary transition-all shadow-lg hover:shadow-primary/10" title="Dashboard">
                         <LayoutDashboard size={24} />
                     </Link>
-                    <Link to="/admin/users" className="p-3 hover:bg-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-primary transition-all shadow-lg hover:shadow-primary/10" title="Utilisateurs">
-                        <Users size={24} />
-                    </Link>
+                    {role === 'admin' && (
+                        <Link to="/admin/users" className="p-3 hover:bg-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-primary transition-all shadow-lg hover:shadow-primary/10" title="Utilisateurs">
+                            <Users size={24} />
+                        </Link>
+                    )}
                     <button className="p-3 hover:bg-white/5 rounded-2xl flex items-center justify-center text-text-muted hover:text-red-400 transition-all">
                         <Settings size={22} />
                     </button>
